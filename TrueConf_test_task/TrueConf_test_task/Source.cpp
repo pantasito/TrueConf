@@ -102,21 +102,20 @@ std::array <bool, MAXIMUM + 1> GetElementsExistingMask(const std::vector<int>& c
 }
 
 void Synchronyze(std::vector<int>& random_vector, std::map<int, int>& random_map) {
-    auto is_in_random_vector = GetElementsExistingMask(random_vector);
-    auto is_in_random_map = GetElementsExistingMask(random_map);
+    auto vector_mask = GetElementsExistingMask(random_vector);
+    auto map_mask = GetElementsExistingMask(random_map);
 
-    const auto IsElementInBothCollections = [&is_in_random_vector, &is_in_random_map](const auto& element) {
-        return !is_in_random_vector[element] || !is_in_random_map[element];
+    const auto IsInOnlyOneCollections = [&vector_mask, &map_mask](const auto& element) {
+        return (vector_mask[element] ^ map_mask[element]);
     };
 
-    auto new_end = remove_if(random_vector.begin(), random_vector.end(), IsElementInBothCollections);
+    auto new_end = remove_if(random_vector.begin(), random_vector.end(), IsInOnlyOneCollections);
     random_vector.erase(new_end, random_vector.end());
 
     for (auto it = random_map.begin(); it != random_map.end();) {
-        if (IsElementInBothCollections(it->second)) {
+        if (IsInOnlyOneCollections(it->second)) {
             it = random_map.erase(it);
-        }
-        else {
+        } else {
             ++it;
         }
     }
@@ -204,7 +203,7 @@ void RunTests() {
     TestRemoveRandomElements();
     TestGetElementsExistingMask();
     TestSynchronyze();
-    for (size_t i = 0; i < 10050; ++i) {        
+    for (size_t i = 0; i < 10050; ++i) {
         auto random_vector = GenerateRandomVector();
         auto random_map = GenerateRandomMap();
         RemoveRandomElementsFromVector(random_vector);
@@ -212,19 +211,15 @@ void RunTests() {
         Synchronyze(random_vector, random_map);
         assert(GetElementsExistingMask(random_vector) == GetElementsExistingMask(random_map));
     }
-    std::cerr << "All tests passed\n";
+    std::cout << "All tests passed\n";
 }
 
-void RunProgram() {
+int main() {
+    RunTests();
     auto random_vector = GenerateRandomVector();
     auto random_map = GenerateRandomMap();
     RemoveRandomElementsFromVector(random_vector);
     RemoveRandomElementsFromMap(random_map);
     Synchronyze(random_vector, random_map);
-}
-
-int main() {
-    RunTests();
-    RunProgram();
     return 0;
 }
