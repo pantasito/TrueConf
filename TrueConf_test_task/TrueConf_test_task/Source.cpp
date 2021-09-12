@@ -7,7 +7,7 @@
 #include <set>
 #include <vector>
 
-const size_t ELEMENTS_COUNT = 10000;
+const size_t ELEMENTS_COUNT = 20;
 const size_t MINIMUM = 1;
 const size_t MAXIMUM = 9;
 const size_t MAX_COUNT_TO_DELETE = 15;
@@ -18,17 +18,17 @@ int GenerateRandomNumber(int minimum = MINIMUM, int maximum = MAXIMUM) {
     return random_number(re);
 }
 
-std::vector<int> GenerateRandomVector() {
-    std::vector<int> random_vector(ELEMENTS_COUNT);
+std::vector<int> GenerateRandomVector(size_t elements_count = ELEMENTS_COUNT) {
+    std::vector<int> random_vector(elements_count);
     for (auto& element : random_vector) {
         element = GenerateRandomNumber();
     }
     return random_vector;
 }
 
-std::map<int, int> GenerateRandomMap() {
+std::map<int, int> GenerateRandomMap(size_t elements_count = ELEMENTS_COUNT) {
     std::map<int, int> random_map;
-    for (size_t i = 0; i < ELEMENTS_COUNT; ++i) {
+    for (size_t i = 0; i < elements_count; ++i) {
         random_map[i] = GenerateRandomNumber();
     }
     return random_map;
@@ -122,11 +122,109 @@ void Synchronyze(std::vector<int>& random_vector, std::map<int, int>& random_map
     }
 }
 
-int main() {
+void TestGenerateRandomNumber() {
+    assert(GenerateRandomNumber(0, 0) == 0);
+    std::set<int> numbers = { 1, 2, 3 };
+    assert(numbers.count(GenerateRandomNumber(1, 3)));
+    assert(numbers.count(GenerateRandomNumber(-10, 0)) == 0);
+}
+
+void TestGenerateRandomVector() {
+    assert(GenerateRandomVector(100).size() == 100);
+    assert(GenerateRandomVector(0).empty());
+    auto random_vector = GenerateRandomVector();
+    assert(random_vector.size() == ELEMENTS_COUNT);
+    for (const auto& element : random_vector) {
+        assert(MINIMUM <= element && element <= MAXIMUM);
+    }
+}
+
+void TestGenerateRandomMap() {
+    assert(GenerateRandomMap(100).size() == 100);
+    assert(GenerateRandomMap(0).empty());
+    auto random_map = GenerateRandomMap();
+    assert(random_map.size() == ELEMENTS_COUNT);
+    for (const auto& [key, value] : random_map) {
+        assert(MINIMUM <= value && value <= MAXIMUM);
+    }
+}
+
+void TestGenerateIndexesToDelete() {
+    auto indexes_to_delete = GenerateIndexesToDelete(ELEMENTS_COUNT);
+    assert(*indexes_to_delete.begin() >= 0);
+    assert(*(--indexes_to_delete.end()) < ELEMENTS_COUNT);
+}
+
+void TestRemoveRandomElements() {
+    auto random_vector = GenerateRandomVector();
+    size_t vector_size_before_remove = random_vector.size();
+    RemoveRandomElementsFromVector(random_vector);
+    assert(vector_size_before_remove > random_vector.size());
+
+    auto random_map = GenerateRandomMap();
+    size_t map_size_before_remove = random_map.size();
+    RemoveRandomElementsFromMap(random_map);
+    assert(map_size_before_remove > random_map.size());
+}
+
+void TestGetElementsExistingMask() {
+    std::array<bool, MAXIMUM + 1> mask;
+    mask.fill(false);
+    assert(mask == GetElementsExistingMask(std::vector<int>()));
+    assert(mask == GetElementsExistingMask(std::map<int, int>()));
+    std::vector<int> random_vector = { 0, MAXIMUM };
+    std::map<int, int> random_map = { {0, 0}, {1, MAXIMUM} };
+    mask[0] = true;
+    mask[MAXIMUM] = true;
+    assert(mask == GetElementsExistingMask(random_vector));
+    assert(mask == GetElementsExistingMask(random_map));
+    random_vector.push_back(7);
+    random_map[7] = 7;
+    assert(mask != GetElementsExistingMask(random_vector));
+    assert(mask != GetElementsExistingMask(random_map));
+}
+
+void TestSynchronyze() {
+    for (size_t i = 0; i < 100; ++i) {
+        size_t elements_count = GenerateRandomNumber(0, ELEMENTS_COUNT);
+        auto random_vector = GenerateRandomVector(elements_count);
+        auto random_map = GenerateRandomMap(elements_count);
+        RemoveRandomElementsFromVector(random_vector);
+        RemoveRandomElementsFromMap(random_map);
+        Synchronyze(random_vector, random_map);
+        assert(GetElementsExistingMask(random_vector) == GetElementsExistingMask(random_map));
+    }
+}
+
+void RunTests() {
+    TestGenerateRandomNumber();
+    TestGenerateRandomVector();
+    TestGenerateRandomMap;
+    TestGenerateIndexesToDelete();
+    TestRemoveRandomElements();
+    TestGetElementsExistingMask();
+    TestSynchronyze();
+    for (size_t i = 0; i < 10050; ++i) {        
+        auto random_vector = GenerateRandomVector();
+        auto random_map = GenerateRandomMap();
+        RemoveRandomElementsFromVector(random_vector);
+        RemoveRandomElementsFromMap(random_map);
+        Synchronyze(random_vector, random_map);
+        assert(GetElementsExistingMask(random_vector) == GetElementsExistingMask(random_map));
+    }
+    std::cerr << "All tests passed\n";
+}
+
+void RunProgram() {
     auto random_vector = GenerateRandomVector();
     auto random_map = GenerateRandomMap();
     RemoveRandomElementsFromVector(random_vector);
     RemoveRandomElementsFromMap(random_map);
     Synchronyze(random_vector, random_map);
+}
+
+int main() {
+    RunTests();
+    RunProgram();
     return 0;
 }

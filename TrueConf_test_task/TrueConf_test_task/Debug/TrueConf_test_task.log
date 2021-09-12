@@ -1,2 +1,3 @@
 ﻿  Source.cpp
+C:\TrueConf\TrueConf_test_task\TrueConf_test_task\Source.cpp(203,5): warning C4551: в вызове функции отсутствует список аргументов
   TrueConf_test_task.vcxproj -> C:\TrueConf\TrueConf_test_task\Debug\TrueConf_test_task.exe
