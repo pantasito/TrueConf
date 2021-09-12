@@ -83,27 +83,27 @@ void RemoveRandomElementsFromMap(std::map<int, int>& random_map) {
     }
 }
 
-std::array <bool, MAXIMUM + 1> GetElementExistingMask(const std::map<int, int>& collection) {
-    std::array <bool, MAXIMUM + 1> is_in_collection;
-    is_in_collection.fill(false);
+std::array <bool, MAXIMUM + 1> GetElementsExistingMask(const std::map<int, int>& collection) {
+    std::array <bool, MAXIMUM + 1> elements_existing_mask;
+    elements_existing_mask.fill(false);
     for (const auto& [key, value] : collection) {
-        is_in_collection[value] = true;
+        elements_existing_mask[value] = true;
     }
-    return is_in_collection;
+    return elements_existing_mask;
 }
 
-std::array <bool, MAXIMUM + 1> GetElementExistingMask(const std::vector<int>& collection) {
-    std::array <bool, MAXIMUM + 1> is_in_collection;
-    is_in_collection.fill(false);
+std::array <bool, MAXIMUM + 1> GetElementsExistingMask(const std::vector<int>& collection) {
+    std::array <bool, MAXIMUM + 1> elements_existing_mask;
+    elements_existing_mask.fill(false);
     for (const auto& element : collection) {
-        is_in_collection[element] = true;
+        elements_existing_mask[element] = true;
     }
-    return is_in_collection;
+    return elements_existing_mask;
 }
 
 void Synchronyze(std::vector<int>& random_vector, std::map<int, int>& random_map) {
-    auto is_in_random_vector = GetElementExistingMask(random_vector);
-    auto is_in_random_map = GetElementExistingMask(random_map);
+    auto is_in_random_vector = GetElementsExistingMask(random_vector);
+    auto is_in_random_map = GetElementsExistingMask(random_map);
 
     const auto IsElementInBothCollections = [&is_in_random_vector, &is_in_random_map](const auto& element) {
         return !is_in_random_vector[element] || !is_in_random_map[element];
